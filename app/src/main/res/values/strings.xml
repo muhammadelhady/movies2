@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">Movies</string>
+    <string name="api_pouplar_url">http://api.themoviedb.org/3/movie/popular?api_key=</string>
+    <string name="api_topRated_url">http://api.themoviedb.org/3/movie/top_rated?api_key=</string>
+    <string name="image_base_url">http://image.tmdb.org/t/p/w185/</string>
+    <string name="api_key"></string>
+    <string name="API_URL_PART1">http://api.themoviedb.org/3/movie/</string>
+    <string name="API_TRAILER_URL">/videos?api_key=</string>
+    <string name="API_REVIEW_URL">/reviews?api_key=</string>
+    <string name="YOUTUBE_URL">https://www.youtube.com/watch?v=</string>
+
+    <string name="value_text_size">20sp</string>
+    <string-array name="SortBy">
+        <item>popular</item>
+        <item>Top Rated</item>
+        <item>Favorit</item>
+    </string-array>
+</resources>
