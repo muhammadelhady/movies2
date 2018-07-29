@@ -1,9 +1,13 @@
 package com.example.muham.movies;
 
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.content.Intent;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -12,6 +16,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,7 +40,7 @@ public class DetailsActivity extends AppCompatActivity {
     ImageView movieImage;
     private  SQLiteDatabase mDb;
     ArrayList<String> DbMovies;
-
+    ImageButton favoritButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -46,6 +51,7 @@ public class DetailsActivity extends AppCompatActivity {
         userRating=(TextView)findViewById(R.id.user_rating_txt);
         relaseDate=(TextView)findViewById(R.id.relase_date_txt);
         overView=(TextView)findViewById(R.id.overviewe_txt);
+        favoritButton=(ImageButton)findViewById(R.id.FavoritImageButton);
 
         FillData();
         MovieReview();
@@ -54,9 +60,23 @@ public class DetailsActivity extends AppCompatActivity {
         mDb=moviesDbHelper.getWritableDatabase();
 
        DbMovies = GetAllDbMovies();
+       setFavoritButtonImage();
     }
 
-
+void setFavoritButtonImage()
+{
+    Resources res = getResources();
+    Drawable img = res.getDrawable(android.R.drawable.btn_star_big_off);
+    favoritButton.setImageDrawable(img);
+for (int i = 0; i  <DbMovies.size();i++)
+{
+    if (movieId.equals(DbMovies.get(i)))
+    {
+        img = res.getDrawable(android.R.drawable.btn_star_big_on);
+        favoritButton.setImageDrawable(img);
+    }
+}
+}
 
 public  ArrayList<String> GetAllDbMovies()
 {
@@ -99,6 +119,7 @@ public void  Favorit(View view)
         Toast.makeText(this, "Unfavorit",Toast.LENGTH_LONG).show();
         RemoveMovieFromDb(movieId);
         DbMovies=GetAllDbMovies();
+        setFavoritButtonImage();
     }
     else
     {
@@ -106,6 +127,7 @@ public void  Favorit(View view)
         Toast.makeText(this, "favorit",Toast.LENGTH_LONG).show();
         AddMovieToDb(movieId);
         DbMovies=GetAllDbMovies();
+        setFavoritButtonImage();
 
     }
 }
@@ -114,17 +136,21 @@ public void  Favorit(View view)
 
  void RemoveMovieFromDb(String movieId)
  {
-      mDb.delete(MoviesContract.MoviesEntry.TABLE_NAME, MoviesContract.MoviesEntry.COULMN_ID + " = " + movieId, null);
-      Log.d("db","remove  = "+title.getText().toString());
+
+     getContentResolver().delete(MoviesContract.MoviesEntry.CONTENT_URI,movieId,null);
+
  }
 
  void AddMovieToDb(String movieId)
  {
+
      ContentValues values = new ContentValues();
      values.put(MoviesContract.MoviesEntry.COULMN_ID,movieId);
      values.put(MoviesContract.MoviesEntry.COULMN_TITLE,title.getText().toString());
-     mDb.insert(MoviesContract.MoviesEntry.TABLE_NAME,null,values);
-     Log.d("db","insert = "+ title.getText().toString() );
+
+   Uri uri = getContentResolver().insert(MoviesContract.MoviesEntry.CONTENT_URI,values);
+
+
 
  }
 

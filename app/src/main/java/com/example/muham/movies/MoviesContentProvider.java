@@ -1,6 +1,8 @@
 package com.example.muham.movies;
 
 import android.content.ContentProvider;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.UriMatcher;
@@ -10,6 +12,7 @@ import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.RestrictTo;
+import android.util.Log;
 
 public class MoviesContentProvider extends ContentProvider {
 
@@ -17,14 +20,24 @@ public class MoviesContentProvider extends ContentProvider {
 
 
 
-    private  static final int MOVIES=100;
+    public static final int CODE_MOVIES = 100;
     MoviesDbHelper moviesDbHelper;
-   private static final UriMatcher suriMatcher = uriMatcher();
-    private static UriMatcher uriMatcher()
-    {
-        UriMatcher uriMatcher= new UriMatcher(UriMatcher.NO_MATCH);
-        uriMatcher.addURI(MoviesContract.AUTHORITY,MoviesContract.PATH_MOVIES,MOVIES);
-        return uriMatcher;
+    private static final UriMatcher sUriMatcher = buildUriMatcher();
+    public static UriMatcher buildUriMatcher() {
+
+
+        final UriMatcher matcher = new UriMatcher(UriMatcher.NO_MATCH);
+        final String authority = MoviesContract.CONTENT_AUTHORITY;
+
+
+
+
+        matcher.addURI(authority, MoviesContract.PATH_MOVIES, CODE_MOVIES);
+
+
+
+
+        return matcher;
     }
     @Override
     public boolean onCreate() {
@@ -39,23 +52,20 @@ public class MoviesContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri, @Nullable String[] projection, @Nullable String selection, @Nullable String[] selectionArgs, @Nullable String sortOrder) {
-        SQLiteDatabase database = moviesDbHelper.getReadableDatabase();
+        final SQLiteDatabase db = moviesDbHelper.getReadableDatabase();
 
-        Cursor mCursor = null;
-        if (suriMatcher.match(uri)==MOVIES)
+        int match = sUriMatcher.match(uri);
+        Cursor retCursor = null;
+
+        switch (match)
         {
-            mCursor=database.query(MoviesContract.MoviesEntry.TABLE_NAME,
-                    projection,
-                    selection,
-                    selectionArgs,
-                    null,
-                    null,
-                    sortOrder);
+            case CODE_MOVIES:
+                retCursor=db.query(MoviesContract.MoviesEntry.TABLE_NAME,projection,selection,selectionArgs,null,null,sortOrder);
+                break;
 
         }
-        mCursor.setNotificationUri(getContext().getContentResolver(),uri);
-
-        return mCursor;
+retCursor.setNotificationUri(getContext().getContentResolver(),uri);
+        return retCursor;
     }
 
     @Nullable
@@ -67,11 +77,37 @@ public class MoviesContentProvider extends ContentProvider {
     @Nullable
     @Override
     public Uri insert(@NonNull Uri uri, @Nullable ContentValues values) {
+
+        final SQLiteDatabase db = moviesDbHelper.getWritableDatabase();
+
+        int match = sUriMatcher.match(uri);
+
+Uri returi;
+        switch (match)
+        {
+            case CODE_MOVIES:
+            long id = db.insert(MoviesContract.MoviesEntry.TABLE_NAME,null,values);
+                break;
+
+        }
         return null;
     }
 
     @Override
     public int delete(@NonNull Uri uri, @Nullable String selection, @Nullable String[] selectionArgs) {
+        final SQLiteDatabase db = moviesDbHelper.getWritableDatabase();
+
+        int match = sUriMatcher.match(uri);
+
+        Uri returi;
+        switch (match)
+        {
+            case CODE_MOVIES:
+               db.delete(MoviesContract.MoviesEntry.TABLE_NAME, MoviesContract.MoviesEntry.COULMN_ID + " = " + selection, null);
+                break;
+
+        }
+
         return 0;
     }
 

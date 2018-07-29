@@ -56,12 +56,46 @@ moviesPouplar=new ArrayList<>();
 moviesTopRated=new ArrayList<>();
 networkStatus=(TextView)findViewById(R.id.network_status);
 spinnerr();
+        int index = movieList.getFirstVisiblePosition();
+        movieList.smoothScrollToPosition( index);
 
         MoviesDbHelper moviesDbHelper =new MoviesDbHelper(this);
         mDb=moviesDbHelper.getWritableDatabase();
 
+
 }
-public void spinnerr()
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+SpinnerClick();
+    }
+
+    public void SpinnerClick()
+    {
+        if (spinner.getSelectedItemPosition()==0&&isOnline())
+        {
+            networkStatus.setText("");
+            new FetchData().execute("Popular");
+
+        }
+        else if(spinner.getSelectedItemPosition()==1&&isOnline())
+        {
+            networkStatus.setText("");
+            new FetchData().execute("TopRated");
+
+        }
+        else if (spinner.getSelectedItemPosition()==2&&isOnline())
+        {
+            networkStatus.setText("");
+            new FetchData().execute("Favorit");
+        }
+        else
+        {
+            networkStatus.setText("NO NETWORK");
+        }
+    }
+    public void spinnerr()
 {
     spinner=(Spinner)findViewById(R.id.spinner);
     ArrayAdapter<CharSequence> adapter=ArrayAdapter.createFromResource(this,R.array.SortBy,R.layout.support_simple_spinner_dropdown_item);
@@ -72,27 +106,7 @@ public void spinnerr()
     spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
         @Override
         public void onItemSelected(AdapterView<?> parentView, View selectedItemView, int position, long id) {
-            if (spinner.getSelectedItemPosition()==0&&isOnline())
-            {
-                networkStatus.setText("");
-                new FetchData().execute("Popular");
-
-            }
-            else if(spinner.getSelectedItemPosition()==1&&isOnline())
-            {
-                networkStatus.setText("");
-                new FetchData().execute("TopRated");
-
-            }
-            else if (spinner.getSelectedItemPosition()==2&&isOnline())
-            {
-                networkStatus.setText("");
-                new FetchData().execute("Favorit");
-            }
-            else
-            {
-                networkStatus.setText("NO NETWORK");
-            }
+           SpinnerClick();
         }
 
         @Override
@@ -179,14 +193,18 @@ String Data;
 
     public  ArrayList<String> GetAllDbMovies()
     {
-        Cursor cursor =  mDb.query(
+     /*  Cursor cursor =  mDb.query(
                 MoviesContract.MoviesEntry.TABLE_NAME,
                 null,
                 null,
                 null,
                 null,
                 null,
-                MoviesContract.MoviesEntry.COULMN_ID);
+                MoviesContract.MoviesEntry.COULMN_ID);*/
+      Log.d("contest","befor callin query");
+       Cursor cursor  = getContentResolver().query(MoviesContract.MoviesEntry.CONTENT_URI,null,null,null, MoviesContract.MoviesEntry.COULMN_ID);
+        Log.d("contest","after callin query");
+        Log.d("contest",cursor.getCount()+"");
         ArrayList<String> DbMovies=new ArrayList<>();
       //  cursor.moveToFirst();
         while(cursor.moveToNext())
