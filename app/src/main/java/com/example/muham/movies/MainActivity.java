@@ -58,15 +58,17 @@ moviesPouplar=new ArrayList<>();
 moviesTopRated=new ArrayList<>();
 networkStatus=(TextView)findViewById(R.id.network_status);
 spinnerr();
-        if (savedInstanceState != null) {
-            // Restore value of members from saved state
-         int state = savedInstanceState.getInt("state");
-
-         Log.d("saved",state+"");
+        if (savedInstanceState != null&& savedInstanceState.getSerializable("x")!=null) {
 
 
+            int x = (int) savedInstanceState.getSerializable("x");
+         Log.d("saved", x+"");
 
-                movieList.smoothScrollToPosition(state);
+
+
+
+
+                movieList.smoothScrollToPosition(x);
 
         }
 
@@ -108,11 +110,12 @@ SpinnerClick();
     }
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
+    public void onSaveInstanceState(Bundle savedInstanceState) {
+        super.onSaveInstanceState(savedInstanceState);
 
    int x = movieList.getFirstVisiblePosition();
-   outState.putInt("state",x);
+Log.d("saved",x+"");
+        savedInstanceState.putSerializable("x",x);
 
     }
 
