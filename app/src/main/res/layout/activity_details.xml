@@ -16,7 +16,8 @@
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_margin="10dp">
+        android:layout_margin="10dp"
+        android:nestedScrollingEnabled="true">
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -135,13 +136,6 @@
             android:orientation="horizontal">
 
             <ImageButton
-                android:id="@+id/imageButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:onClick="WatchTrailer"
-                app:srcCompat="@android:drawable/ic_menu_camera" />
-            <ImageButton
                 android:id="@+id/FavoritImageButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -151,34 +145,24 @@
                 />
 
 
-
         </LinearLayout>
 
-        <LinearLayout
+        <ListView
+            android:id="@+id/review_ListView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="horizontal">
+            android:layout_height="150dp"
+            android:nestedScrollingEnabled="true"
+            android:layout_weight="1"
+            android:layout_marginBottom="20dp"
+            />
 
-            <TextView
-                android:id="@+id/review_title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textSize="24sp"
-                android:layout_weight="1"
-                android:text="Review :  "
-                android:textStyle="bold"
-                android:textColor="#000"/>
+        <ListView
+            android:id="@+id/trailers_ListView"
+            android:layout_width="match_parent"
+            android:nestedScrollingEnabled="true"
 
-            <TextView
-                android:id="@+id/review_TextView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight=".5"
-                android:textSize="20sp"
-                android:textColor="#000"
-                android:layout_marginBottom="20dp"
-                />
-        </LinearLayout>
+            android:layout_height="150dp"
+            android:layout_marginBottom="20dp"/>
 
     </LinearLayout>
     </ScrollView>

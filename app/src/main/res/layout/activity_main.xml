@@ -30,6 +30,7 @@
         android:layout_height="match_parent"
        android:numColumns="2"
         android:layout_gravity="center"
+        android:nestedScrollingEnabled="true"
 android:background="#FFF"
         android:id="@+id/moives_grid">
 

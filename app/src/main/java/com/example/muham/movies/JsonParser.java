@@ -42,7 +42,7 @@ public class JsonParser {
          movie.setMovieRate(currenObject.getString("vote_average"));
          movie.setOverView(currenObject.getString("overview"));
          movie.setReleseDate(currenObject.getString("release_date"));
-         movie.setImageUrl(currenObject.getString("backdrop_path"));
+         movie.setImageUrl(currenObject.getString("poster_path"));
          movie.setMovieId(currenObject.getString("id"));
          listOfMovies.add(movie);
       }
@@ -63,21 +63,32 @@ public class JsonParser {
 
    }
 
-   static String ParseMovieTrailer(String jsonString) throws JSONException {
+   static  ArrayList<String> ParseMovieTrailer(String jsonString) throws JSONException {
+       ArrayList<String> trailerKey=new ArrayList<>();
        JSONObject jsonData= new JSONObject(jsonString);
        JSONArray trailer=jsonData.getJSONArray("results");
-       JSONObject jsonObject = trailer.getJSONObject(0);
-       String trailerKey= jsonObject.getString("key");
+       for (int i = 0  ; i < trailer.length();i++)
+       {
+           JSONObject jsonObject = trailer.getJSONObject(i);
+           trailerKey.add(jsonObject.getString("key")) ;
+       }
+
        return trailerKey;
    }
 
 
-    static String ParseMovieReviews(String jsonString) throws JSONException {
+    static ArrayList<String> ParseMovieReviews(String jsonString) throws JSONException {
+        ArrayList<String> reviewContent=new ArrayList<>();
         JSONObject jsonData= new JSONObject(jsonString);
         JSONArray trailer=jsonData.getJSONArray("results");
-        JSONObject jsonObject = trailer.getJSONObject(0);
-        String reviewContent= jsonObject.getString("content");
-           return reviewContent;
+        for (int i = 0  ; i < trailer.length();i++)
+        {
+            JSONObject jsonObject = trailer.getJSONObject(i);
+            reviewContent.add(jsonObject.getString("content")) ;
+        }
+         return reviewContent;
     }
+
+
 
 }

@@ -13,11 +13,15 @@ import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -36,10 +40,10 @@ import java.util.ArrayList;
 public class DetailsActivity extends AppCompatActivity {
 
     TextView title,orignalTitle,userRating,relaseDate,overView, reviewTextView;
-       String movieId,movieKey,reviewContent;
+       String movieId;
     ImageView movieImage;
-    private  SQLiteDatabase mDb;
-    ArrayList<String> DbMovies;
+
+    ArrayList<String> DbMovies,movieKey,reviewContent;
     ImageButton favoritButton;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -56,11 +60,11 @@ public class DetailsActivity extends AppCompatActivity {
         FillData();
         MovieReview();
 
-        MoviesDbHelper moviesDbHelper =new MoviesDbHelper(this);
-        mDb=moviesDbHelper.getWritableDatabase();
+
 
        DbMovies = GetAllDbMovies();
        setFavoritButtonImage();
+        WatchTrailer();
     }
 
 void setFavoritButtonImage()
@@ -80,15 +84,10 @@ for (int i = 0; i  <DbMovies.size();i++)
 
 public  ArrayList<String> GetAllDbMovies()
 {
-  Cursor cursor =  mDb.query(
-            MoviesContract.MoviesEntry.TABLE_NAME,
-            null,
-            null,
-            null,
-            null,
-            null,
-            MoviesContract.MoviesEntry.COULMN_ID);
-ArrayList<String> DbMovies=new ArrayList<>();
+
+    Cursor cursor  = getContentResolver().query(MoviesContract.MoviesEntry.CONTENT_URI,null,null,null, MoviesContract.MoviesEntry.COULMN_ID);
+
+    ArrayList<String> DbMovies=new ArrayList<>();
 
     while(cursor.moveToNext())
   {
@@ -104,7 +103,7 @@ boolean IfMovieExistInDb(String movieId)
     {
         if (movieId.equals(DbMovies.get(i)))
         {
-            Log.d("db","found  = " +DbMovies.get(i));
+
             return true;
         }
     }
@@ -169,7 +168,7 @@ public void  Favorit(View view)
     }
 
 
-    public void WatchTrailer(View view)
+    public void WatchTrailer()
     {
       new GetTrailerUrl().execute();
     }
@@ -201,11 +200,55 @@ public void  Favorit(View view)
         @Override
         protected void onPostExecute(String s) {
 
-            String url=getResources().getString(R.string.YOUTUBE_URL)+movieKey;
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(intent);
+
+       TrailersAdapter trailersAdapter = new TrailersAdapter(movieKey);
+       ListView  listView = (ListView)findViewById(R.id.trailers_ListView);
+       listView.setAdapter(trailersAdapter);
+       listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+           @Override
+           public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+               String url=getResources().getString(R.string.YOUTUBE_URL)+movieKey.get(position);
+               Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+               startActivity(intent);
+           }
+       });
 
             super.onPostExecute(s);
+        }
+    }
+
+    class TrailersAdapter extends BaseAdapter{
+
+        ArrayList<String> trailers=new ArrayList<>();
+
+        public TrailersAdapter(ArrayList<String> trailers)
+        {
+            this.trailers=trailers;
+
+        }
+        @Override
+        public int getCount() {
+            return trailers.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return trailers.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = getLayoutInflater();
+            View view = inflater.inflate(R.layout.trailer_row_view,null);
+            TextView textView =(TextView)view.findViewById(R.id.trailer_txt);
+            Log.d("test",trailers.size()+"");
+            textView.setText("trailer "+(position+1));
+            return view;
         }
     }
 
@@ -220,10 +263,13 @@ public void  Favorit(View view)
 
         @Override
         protected String doInBackground(String... strings) {
+
             String trailerApiUrl= getResources().getString(R.string.API_URL_PART1)+movieId+getResources().getString(R.string.API_REVIEW_URL)+getResources().getString(R.string.api_key);
+
                 try {
                 String Data=  HttpConnections.ConnectHttpUrl(trailerApiUrl);
                 reviewContent=    JsonParser.ParseMovieReviews(Data);
+
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             } catch (IOException e) {
@@ -238,9 +284,49 @@ public void  Favorit(View view)
 
         @Override
         protected void onPostExecute(String s) {
-             reviewTextView= (TextView)findViewById(R.id.review_TextView);
-            reviewTextView.setText(reviewContent);
+            ReviwesAdapter reviwesAdapter=new ReviwesAdapter(reviewContent);
+            ListView listView  =(ListView)findViewById(R.id.review_ListView);
+            listView.setAdapter(reviwesAdapter);
            super.onPostExecute(s);
+        }
+
+    }
+
+
+    class ReviwesAdapter extends BaseAdapter
+    {
+
+        ArrayList<String> reviwes=new ArrayList<>();
+
+        public ReviwesAdapter(ArrayList<String> reviwes)
+        {
+            this.reviwes=reviwes;
+        }
+
+        @Override
+        public int getCount() {
+            return reviwes.size();
+        }
+
+        @Override
+        public Object getItem(int position) {
+            return reviwes.get(position);
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return position;
+        }
+
+        @Override
+        public View getView(int position, View convertView, ViewGroup parent) {
+            LayoutInflater inflater = getLayoutInflater();
+            View view = inflater.inflate(R.layout.review_row_view,null);
+            TextView counter = (TextView)view.findViewById(R.id.review_txt_counter);
+            counter.setText("Review "+(position+1)+" :");
+            TextView txt = (TextView)view.findViewById(R.id.review_txt);
+            txt.setText(reviwes.get(position));
+            return view;
         }
     }
 

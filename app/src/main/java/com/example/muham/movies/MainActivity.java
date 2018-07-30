@@ -7,6 +7,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
+import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -39,12 +41,12 @@ import java.util.ArrayList;
 
 import static com.example.muham.movies.R.string.api_pouplar_url;
 import static com.example.muham.movies.R.string.image_base_url;
+import static java.lang.Integer.parseInt;
 
 public class MainActivity extends AppCompatActivity {
     private static final String API_KEY = BuildConfig.API_KEY;
 Spinner spinner;
 GridView movieList;
-    private SQLiteDatabase mDb;
 TextView networkStatus;
     ArrayList<movie>moviesPouplar,moviesTopRated;
     @Override
@@ -56,11 +58,20 @@ moviesPouplar=new ArrayList<>();
 moviesTopRated=new ArrayList<>();
 networkStatus=(TextView)findViewById(R.id.network_status);
 spinnerr();
-        int index = movieList.getFirstVisiblePosition();
-        movieList.smoothScrollToPosition( index);
+        if (savedInstanceState != null) {
+            // Restore value of members from saved state
+         int state = savedInstanceState.getInt("state");
 
-        MoviesDbHelper moviesDbHelper =new MoviesDbHelper(this);
-        mDb=moviesDbHelper.getWritableDatabase();
+         Log.d("saved",state+"");
+
+
+
+                movieList.smoothScrollToPosition(state);
+
+        }
+
+
+
 
 
 }
@@ -95,6 +106,16 @@ SpinnerClick();
             networkStatus.setText("NO NETWORK");
         }
     }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+   int x = movieList.getFirstVisiblePosition();
+   outState.putInt("state",x);
+
+    }
+
     public void spinnerr()
 {
     spinner=(Spinner)findViewById(R.id.spinner);
@@ -116,6 +137,7 @@ SpinnerClick();
 
     });
 }
+
 
     public boolean isOnline() {
         ConnectivityManager cm =
@@ -193,18 +215,10 @@ String Data;
 
     public  ArrayList<String> GetAllDbMovies()
     {
-     /*  Cursor cursor =  mDb.query(
-                MoviesContract.MoviesEntry.TABLE_NAME,
-                null,
-                null,
-                null,
-                null,
-                null,
-                MoviesContract.MoviesEntry.COULMN_ID);*/
-      Log.d("contest","befor callin query");
+
+
        Cursor cursor  = getContentResolver().query(MoviesContract.MoviesEntry.CONTENT_URI,null,null,null, MoviesContract.MoviesEntry.COULMN_ID);
-        Log.d("contest","after callin query");
-        Log.d("contest",cursor.getCount()+"");
+
         ArrayList<String> DbMovies=new ArrayList<>();
       //  cursor.moveToFirst();
         while(cursor.moveToNext())
