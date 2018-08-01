@@ -11,6 +11,7 @@ import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -48,32 +49,18 @@ public class MainActivity extends AppCompatActivity {
 Spinner spinner;
 GridView movieList;
 TextView networkStatus;
+int scrollstate=0;
     ArrayList<movie>moviesPouplar,moviesTopRated;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);
 movieList=(GridView) findViewById(R.id.moives_grid);
 moviesPouplar=new ArrayList<>();
 moviesTopRated=new ArrayList<>();
 networkStatus=(TextView)findViewById(R.id.network_status);
 spinnerr();
-        if (savedInstanceState != null&& savedInstanceState.getSerializable("x")!=null) {
-
-
-            int x = (int) savedInstanceState.getSerializable("x");
-         Log.d("saved", x+"");
-
-
-
-
-
-                movieList.smoothScrollToPosition(x);
-
-        }
-
-
-
 
 
 }
@@ -82,6 +69,22 @@ spinnerr();
     protected void onResume() {
         super.onResume();
 SpinnerClick();
+
+
+    }
+
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("state",movieList.getFirstVisiblePosition());
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+      scrollstate=savedInstanceState.getInt("state");
+
     }
 
     public void SpinnerClick()
@@ -109,15 +112,7 @@ SpinnerClick();
         }
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle savedInstanceState) {
-        super.onSaveInstanceState(savedInstanceState);
 
-   int x = movieList.getFirstVisiblePosition();
-Log.d("saved",x+"");
-        savedInstanceState.putSerializable("x",x);
-
-    }
 
     public void spinnerr()
 {
@@ -240,6 +235,8 @@ String Data;
         listVeiewAdapter listVeiewAdapter=new listVeiewAdapter(movies);
         movieList.setAdapter(null);
         movieList.setAdapter(listVeiewAdapter);
+        if(scrollstate!=0)
+        movieList.smoothScrollToPosition(scrollstate);
         movieList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -291,8 +288,6 @@ String Data;
             LayoutInflater layoutInflater=getLayoutInflater();
 
             View view1 =  layoutInflater.inflate(R.layout.row_layout,viewGroup,false);
-       textView=(TextView)view1.findViewById(R.id.movie_title);
-            textView.setText(movies.get(i).getTitle());
 
             ImageView imageView=(ImageView)view1.findViewById(R.id.movie_thumbnail);
 
